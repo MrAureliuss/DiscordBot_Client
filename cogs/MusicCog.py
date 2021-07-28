@@ -23,14 +23,16 @@ class MusicCog(commands.Cog):
 
                 music_track = Track.MusicTrack(player, ctx)
                 if not ctx.voice_client.is_playing():
-                    embed = discord.Embed(title=":musical_note:  Ваши уши греет песня :musical_note: ", description=str(player.title),
+                    embed = discord.Embed(title=":musical_note:  Ваши уши греет песня :musical_note: ",
+                                          description=str(player.title),
                                           color=0xFF00FF)
                     embed.add_field(name="Заказал пластинку", value=str(ctx.message.author))
                     ctx.voice_client.play(player, after=lambda check_queue: self.get_next_song(ctx.guild.id))
                 else:
                     self.add_music_to_queue(ctx.guild.id, music_track)
                     embed = discord.Embed(title="На данный момент бот уже проигрывает музыку.\n"
-                                                "Выбранная аудиодорожка поставлена в очередь Вашего канала.", description=str(player.title),
+                                                "Выбранная аудиодорожка поставлена в очередь Вашего канала.",
+                                          description=str(player.title),
                                           color=0xFF00FF)
 
                 await ctx.send(embed=embed)
@@ -129,7 +131,7 @@ class MusicCog(commands.Cog):
 
     def get_next_song(self, guild_id):
         """Воспроизведение песен из очереди.
-        Если в канале (guild.id) есть треки которые еще не иргали - воспроизводим их."""
+        Если в канале (guild.id) есть треки которые еще не играли - воспроизводим их."""
         song_values = self.queue.get(guild_id)  # Берем очередь песен для нужного канала.
         if len(song_values) > 0:    # Если в очереди есть песни.
             music_track = song_values[0]    # Берем первую из очереди песню в канале.
@@ -140,7 +142,8 @@ class MusicCog(commands.Cog):
 
             ctx.voice_client.play(player, after=lambda check_queue: self.get_next_song(ctx.guild.id))
 
-            embed = discord.Embed(title=":musical_note:  Встречайте песню из очереди :musical_note: ", description=str(player.title),
+            embed = discord.Embed(title=":musical_note:  Встречайте песню из очереди :musical_note: ",
+                                  description=str(player.title),
                                   color=0xFF00FF)
             embed.add_field(name="Заказал пластинку", value=str(ctx.message.author))
 
