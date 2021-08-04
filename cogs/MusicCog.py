@@ -12,12 +12,15 @@ class MusicCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.queue = {}
+        self.skip_count = {}
 
     @commands.command()
     async def play(self, ctx, *, url):
         """Функция проигрывания музыки в музыкальном канале."""
         async with ctx.typing():
             try:
+                self.skip_count[ctx.guild.id] = []  # Предварительно создаем слоты для возможных skip'ов песен.
+
                 player = await YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
                 embed = discord.Embed()
 
@@ -60,12 +63,39 @@ class MusicCog(commands.Cog):
         except ValueError:
             await ctx.send("Ошибка! Громкость звука должна являться целочисленным числом.")
 
-    @commands.command()
+    @commands.has_permissions(administrator=True)
     async def pause(self, ctx):
-        """Приостановка текущей аудиодорожки."""
+        """Приостановка текущей аудиодорожки администратором."""
         try:
             if ctx.voice_client.is_playing():
                 ctx.voice_client.pause()
+            else:
+                await ctx.send("Ошибка! На данный момент бот не воспроизводит музыку.")
+        except AttributeError:
+            await ctx.send("Ошибка! Бот не находится ни в одном голосовом канале.")
+
+    @commands.command()
+    async def skip(self, ctx):
+        """Приостановка текущей аудиодорожки путем голосования (нужно >= 50% голосов)."""
+        try:
+            if ctx.voice_client.is_playing():
+                self.skip_count.get(ctx.guild.id).append(ctx.message.author) if \
+                    ctx.message.author not in self.skip_count.get(ctx.guild.id) else \
+                    self.skip_count.get(ctx.guild.id)  # Если пользователь еще не голосовал за skip - добавляем его.
+
+                # Скипаем если этого хотят больше половины, в ином случае уведомляем о количестве людей которые хотят скипа.
+                if len(self.skip_count.get(ctx.guild.id)) >= len([m for m in ctx.guild.members if not m.bot]) / 2:
+                    ctx.voice_client.stop()
+                    self.skip_count[ctx.guild.id] = []  # Обнуляем список желающих скипа песни для данного канала.
+                    await ctx.send("Решением большинства участников канала песня пропущена.")
+                else:
+                    embed = discord.Embed(title=":no_entry_sign:  Решение о пропуске песни. :no_entry_sign: ",
+                                          description=str("За пропуск песени проголосовали " +
+                                                          str(len(self.skip_count.get(ctx.guild.id))) + "/" +
+                                                          str(len([m for m in ctx.guild.members if not m.bot]) / 2)),
+                                          color=0xFF00FF)
+                    await ctx.send(embed=embed)
+
             else:
                 await ctx.send("Ошибка! На данный момент бот не воспроизводит музыку.")
         except AttributeError:
@@ -133,7 +163,7 @@ class MusicCog(commands.Cog):
         """Воспроизведение песен из очереди.
         Если в канале (guild.id) есть треки которые еще не играли - воспроизводим их."""
         song_values = self.queue.get(guild_id)  # Берем очередь песен для нужного канала.
-        if len(song_values) > 0:    # Если в очереди есть песни.
+        if song_values is not None and len(song_values) > 0:    # Если в очереди есть песни.
             music_track = song_values[0]    # Берем первую из очереди песню в канале.
             del song_values[0]  # Удаляем из очереди трек который будет воспроизводить.
 
