@@ -14,7 +14,7 @@ class ControlCog(commands.Cog):
             voice_channel = ctx.author.voice.channel
             await voice_channel.connect()
         except AttributeError:
-            await ctx.send("Ошибка! Вы должны нахдоится в голосовом канале.")
+            await ctx.send("Ошибка! Вы должны находиться в голосовом канале.")
 
     @commands.command()
     async def leave(self, ctx):

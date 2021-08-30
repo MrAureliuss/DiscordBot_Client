@@ -165,7 +165,7 @@ class MusicCog(commands.Cog):
         song_values = self.queue.get(guild_id)  # Берем очередь песен для нужного канала.
         if song_values is not None and len(song_values) > 0:    # Если в очереди есть песни.
             music_track = song_values[0]    # Берем первую из очереди песню в канале.
-            del song_values[0]  # Удаляем из очереди трек который будет воспроизводить.
+            del song_values[0]  # Удаляем из очереди трек который будем воспроизводить.
 
             player = music_track.get_music_player()
             ctx = music_track.get_ctx()
