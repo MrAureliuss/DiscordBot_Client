@@ -1,2 +1,3 @@
 ./utils/ffmpeg/
 .idea
+config.env
