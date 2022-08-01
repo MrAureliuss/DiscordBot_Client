@@ -1,19 +1,26 @@
-import os
-from discord.ext import commands
+import asyncio
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from bot_init import bot, load_extensions
 from config import settings
+from web import routes
+
+origins = [
+    "http://localhost:8080"
+]
+
+api = FastAPI()  # Подключаем библиотеку для работы с API.
+api.include_router(routes.router)  # Подключаем файл с маршрутами.
+api.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
-def load_extensions(bot):
-    """
-    Функция для загрузки всех cog'ов из директории cogs.
-    """
-    for cog in os.listdir(".\\cogs\\"):
-        if ".py" in str(cog):
-            bot.load_extension("cogs." + str(cog).replace(".py", ""))
-
-
-if __name__ == '__main__':
-    bot = commands.Bot(command_prefix=settings['command_prefix'])
+@api.on_event("startup")
+async def startup_event():
     load_extensions(bot)
-
-    bot.run(settings['token'])
+    asyncio.create_task(bot.start(settings['token']))

@@ -6,12 +6,13 @@ from discord.ext import commands
 from discord.ext.commands import CommandInvokeError
 from discord.errors import ClientException
 from utils.YTDLSource import YTDLSource
+from utils.QueueHolder import queue_holder
 
 
 class MusicCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.queue = {}
+        self.queue = queue_holder().queue
         self.skip_count = {}
 
     @commands.command()
@@ -63,7 +64,7 @@ class MusicCog(commands.Cog):
         except ValueError:
             await ctx.send("Ошибка! Громкость звука должна являться целочисленным числом.")
 
-    @commands.has_permissions(administrator=True)
+    @commands.command()
     async def pause(self, ctx):
         """Приостановка текущей аудиодорожки администратором."""
         try:
@@ -87,7 +88,7 @@ class MusicCog(commands.Cog):
                 if len(self.skip_count.get(ctx.guild.id)) >= len([m for m in ctx.guild.members if not m.bot]) / 2:
                     ctx.voice_client.stop()
                     self.skip_count[ctx.guild.id] = []  # Обнуляем список желающих скипа песни для данного канала.
-                    await ctx.send("Решением большинства участников канала песня пропущена.")
+                    await ctx.send("Решением половины участников канала песня пропущена.")
                 else:
                     embed = discord.Embed(title=":no_entry_sign:  Решение о пропуске песни. :no_entry_sign: ",
                                           description=str("За пропуск песени проголосовали " +
