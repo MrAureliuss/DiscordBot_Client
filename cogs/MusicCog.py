@@ -4,7 +4,10 @@ import discord
 import utils.MusicTrack as Track
 from discord.ext import commands
 from discord.ext.commands import CommandInvokeError
+from discord.ext.commands.errors import CheckFailure
 from discord.errors import ClientException
+
+from db.BlacklistUserChecker import user_not_in_blacklist
 from utils.YTDLSource import YTDLSource
 from utils.QueueHolder import queue_holder
 
@@ -16,6 +19,7 @@ class MusicCog(commands.Cog):
         self.skip_count = {}
 
     @commands.command()
+    @commands.check(user_not_in_blacklist)
     async def play(self, ctx, *, url):
         """Функция проигрывания музыки в музыкальном канале."""
         async with ctx.typing():
@@ -46,11 +50,13 @@ class MusicCog(commands.Cog):
                 await ctx.send("Ошибка! Бот уже воспроизводит музыку.")
 
     @commands.command()
+    @commands.check(user_not_in_blacklist)
     async def stop(self, ctx):
         """Функция отключения текущей аудиодорожки."""
         ctx.voice_client.stop()
 
     @commands.command()
+    @commands.check(user_not_in_blacklist)
     async def volume(self, ctx, volume):
         """Изменение громкости бота в музыкальном канале."""
         try:
@@ -65,6 +71,7 @@ class MusicCog(commands.Cog):
             await ctx.send("Ошибка! Громкость звука должна являться целочисленным числом.")
 
     @commands.command()
+    @commands.check(user_not_in_blacklist)
     async def pause(self, ctx):
         """Приостановка текущей аудиодорожки администратором."""
         try:
@@ -76,6 +83,7 @@ class MusicCog(commands.Cog):
             await ctx.send("Ошибка! Бот не находится ни в одном голосовом канале.")
 
     @commands.command()
+    @commands.check(user_not_in_blacklist)
     async def skip(self, ctx):
         """Приостановка текущей аудиодорожки путем голосования (нужно >= 50% голосов)."""
         try:
@@ -103,6 +111,7 @@ class MusicCog(commands.Cog):
             await ctx.send("Ошибка! Бот не находится ни в одном голосовом канале.")
 
     @commands.command()
+    @commands.check(user_not_in_blacklist)
     async def resume(self, ctx):
         """Продолжение приостановленной аудиодорожки."""
         try:
@@ -118,6 +127,7 @@ class MusicCog(commands.Cog):
             await ctx.send("Ошибка! Бот не находится ни в одном голосовом канале.")
 
     @commands.command()
+    @commands.check(user_not_in_blacklist)
     async def queue(self, ctx):
         """Показ очереди песен в канале."""
         if (self.queue.get(ctx.guild.id) is not None) and len(self.queue.get(ctx.guild.id)) > 0:
@@ -136,6 +146,7 @@ class MusicCog(commands.Cog):
             await ctx.send("Очередь песен Вашего канала пуста.")
 
     @commands.command()
+    @commands.check(user_not_in_blacklist)
     async def shuffle(self, ctx):
         """Перемешивание песен в очереди."""
         if (self.queue.get(ctx.guild.id) is not None) and len(self.queue.get(ctx.guild.id)) > 0:
