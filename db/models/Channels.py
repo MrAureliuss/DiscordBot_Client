@@ -1,4 +1,4 @@
-from sqlalchemy import Table, Column, Integer, Boolean, TIMESTAMP, BIGINT, VARCHAR
+from sqlalchemy import Table, Column, Boolean, TIMESTAMP, BIGINT, VARCHAR
 from db.CreateDBEngine import meta
 
 channel = Table(

@@ -22,7 +22,7 @@ class SpeechController:
     async def synthesis(self, speech: Speech):
         stmt = select(channel).where(
             channel.c.display_name == str(speech.display_name),
-            channel.c.owner_id == str(speech.user_id)
+            channel.c.owner_id == str(speech.channel_owner_id)
         )
 
         row_count = self.session.execute(stmt).rowcount

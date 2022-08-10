@@ -1,4 +1,6 @@
 import os
+
+import discord
 from discord.ext import commands
 from config import settings
 
@@ -12,4 +14,6 @@ def load_extensions(bot):
             bot.load_extension("cogs." + str(cog).replace(".py", ""))
 
 
-bot = commands.Bot(command_prefix=settings['command_prefix'])
+intents = discord.Intents.all()
+bot = commands.Bot(command_prefix=settings['command_prefix'], intents=intents)
+
